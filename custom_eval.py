@@ -60,78 +60,48 @@ def process_model_results(response_file, n_row, sequence_length):
     generate_subimage_heatmap(accuracies, n_row)
 
 def generate_subimage_heatmap(accuracies, n_row):
-    """Generate and save heatmaps for multiple models side by side with customizable spacing and global label."""
+    """Generate and save heatmaps for multiple models side by side"""
     try:
-        # User-configurable spacing and sizes
-        heatmap_size = 4.5  # Each heatmap will be 4.5x4.5 inches
-        title_spacing = 25  # Vertical spacing for titles (adjust as needed)
-        horizontal_spacing = .4  # Horizontal spacing between heatmaps
-        global_label = "M=1, N=2"  # Top-left global label
-        cbar_label_fontsize = 20  # Font size for the color bar label
-        cbar_ticks_fontsize = 18  # Font size for the tick numbers on the color bar
-
         # Prepare the figure to plot heatmaps side by side
-        n_col = len(accuracies)
-        fig, axes = plt.subplots(
-            1, n_col,
-            figsize=(heatmap_size * n_col + (horizontal_spacing * (n_col - 1)), heatmap_size + 0.5),  # Adjust for horizontal space
-            gridspec_kw={'wspace': horizontal_spacing, 'top': 0.85}  # Horizontal and top spacing
-        )
-
-        # Add the global label closer to the heatmaps
-        plt.text(
-            0.05, 0.5, global_label,  # Adjusted position closer to the heatmaps
-            fontsize=18, fontweight='bold', color='black', 
-            ha='center', va='center', transform=fig.transFigure
-        )
+        fig, axes = plt.subplots(1, len(accuracies), figsize=(5 * len(accuracies), 5))
 
         # If there's only one model, axes is a single axis, so wrap it in a list
-        if n_col == 1:
+        if len(accuracies) == 1:
             axes = [axes]
 
-        # Define the custom colormap
-        custom_cmap = LinearSegmentedColormap.from_list("custom_cmap", ["#F0496E", "#EBB839", "#0CD79F"])
-
-        # Plot each heatmap
+        # Loop over the models and plot each heatmap
         for ax, (model_name, avg_accuracy, acc_subimage) in zip(axes, accuracies):
+            # Generate heatmap for the model
             sns.heatmap(
                 acc_subimage,
                 ax=ax,
                 vmin=0, vmax=1,
-                cmap=custom_cmap,
-                cbar=False,  # Disable individual color bars
+                cmap=LinearSegmentedColormap.from_list(
+                    "custom_cmap", ["#F0496E", "#EBB839", "#0CD79F"]
+                ),
+                cbar_kws={'label': 'Score'},
                 linewidths=0.5,
                 linecolor='grey',
                 linestyle='--',
-                annot=False
+                annot=False,
             )
 
-            # Ensure square appearance
-            ax.set_aspect('equal')  # Force aspect ratio to be 1:1
+            # Remove tick marks and labels
             ax.set_xticks([])
             ax.set_yticks([])
+            ax.set_xlabel("")
+            ax.set_ylabel("")
 
-            # Add the title with customizable spacing
-            ax.set_title(f"{model_name}", fontsize=18, fontweight='bold', pad=title_spacing)
+            # Add the title and average accuracy to the heatmap
+            ax.set_title(f"{model_name}", fontsize=18, fontweight='bold')
 
-        # Add a single color bar for all heatmaps
-        cbar = fig.colorbar(
-            plt.cm.ScalarMappable(cmap=custom_cmap, norm=plt.Normalize(vmin=0, vmax=1)),
-            ax=axes,
-            orientation='vertical',
-            fraction=0.02,  # Fraction of figure size for the color bar
-            pad=0.05,       # Spacing between color bar and heatmaps
-            label="Score"
-        )
+        # Adjust layout for better spacing between heatmaps
+        plt.tight_layout()
 
-        # Customize color bar font sizes
-        cbar.set_label('Score', fontsize=cbar_label_fontsize, fontweight = 'bold')  # Adjust the color bar label font size
-        cbar.ax.tick_params(labelsize=cbar_ticks_fontsize)  # Adjust the tick labels font size
-
-        # Save the figure
-        plt.savefig("custom_spaced_heatmaps.png", bbox_inches="tight")
+        # Save the figure with all heatmaps side by side
+        plt.savefig("all_models_heatmaps.png", bbox_inches="tight")
         plt.close()
-        print("Heatmaps saved with customizable spacing and global label.")
+        print("Heatmaps saved for all models")
     except Exception as e:
         print(f"Error generating heatmap: {e}")
 

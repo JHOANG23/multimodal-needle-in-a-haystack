@@ -32,9 +32,6 @@ def needle_test(images, instruction):
         print(f"An error occurred: {e}")
         return None
 
-
-
-
 def main(): 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
