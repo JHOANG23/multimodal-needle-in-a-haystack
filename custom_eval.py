@@ -35,7 +35,7 @@ def process_model_results(response_file, n_row, sequence_length):
                 needle_count_subimage[gt_row - 1][gt_col - 1] += 1
                 if model_name == "Paligemma w/ Diff. Attn.":
                     if gt_col == pred_col:
-                        exact_match_subimage[gt_row - 1][gt_col - 1] += 1.2
+                        exact_match_subimage[gt_row - 1][gt_col - 1] += 1
                 else:
                     if gt_row == pred_row and gt_col == pred_col:
                         exact_match_subimage[gt_row - 1][gt_col - 1] += 1
@@ -57,81 +57,80 @@ def process_model_results(response_file, n_row, sequence_length):
         accuracies.append((model_name, avg_accuracy, acc_subimage))
 
     # After processing all models, pass all the accuracies to the heatmap generation function
-    generate_subimage_heatmap(accuracies, n_row)
+    generate_subimage_heatmap(accuracies, n_row, 1, 2)
+    generate_accuracy_table(accuracies)  # NEW
 
-def generate_subimage_heatmap(accuracies, n_row):
-    """Generate and save heatmaps for multiple models side by side"""
+def generate_subimage_heatmap(accuracies, n_row, M, N):
+    """Generate and save heatmaps for multiple models side by side with one shared color bar and left-side info text"""
     try:
-        # Prepare the figure to plot heatmaps side by side
-        fig, axes = plt.subplots(1, len(accuracies), figsize=(5 * len(accuracies), 5))
+        title_pad = 15  # spacing between title and plot, tweak this value as needed
 
-        # If there's only one model, axes is a single axis, so wrap it in a list
-        if len(accuracies) == 1:
-            axes = [axes]
+        num_models = len(accuracies)
+        fig, axes = plt.subplots(1, num_models, figsize=(5 * num_models + 2, 5), squeeze=False)  # added +2 width for left text
+        axes = axes[0]  # Flatten to 1D list
 
-        # Loop over the models and plot each heatmap
+        # Add left side text box (centered vertically)
+        left_text = f"M = {M}, N = {N}"
+        fig.text(0.02, 0.5, left_text, fontsize=14, fontweight='bold', va='center', ha='left')
+
+        # Define custom colormap
+        cmap = LinearSegmentedColormap.from_list("custom_cmap", ["#F0496E", "#EBB839", "#0CD79F"])
+
+        # Plot each heatmap without a color bar
         for ax, (model_name, avg_accuracy, acc_subimage) in zip(axes, accuracies):
-            # Generate heatmap for the model
             sns.heatmap(
                 acc_subimage,
                 ax=ax,
                 vmin=0, vmax=1,
-                cmap=LinearSegmentedColormap.from_list(
-                    "custom_cmap", ["#F0496E", "#EBB839", "#0CD79F"]
-                ),
-                cbar_kws={'label': 'Score'},
+                cmap=cmap,
+                cbar=False,
                 linewidths=0.5,
                 linecolor='grey',
                 linestyle='--',
                 annot=False,
             )
-
-            # Remove tick marks and labels
             ax.set_xticks([])
             ax.set_yticks([])
             ax.set_xlabel("")
             ax.set_ylabel("")
+            ax.set_title(f"{model_name}", fontsize=14, fontweight='bold', pad=title_pad)  # use title_pad here
 
-            # Add the title and average accuracy to the heatmap
-            ax.set_title(f"{model_name}", fontsize=18, fontweight='bold')
+        # Create a single colorbar on the right
+        cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+        norm = plt.Normalize(vmin=0, vmax=1)
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])
+        cbar = fig.colorbar(sm, cax=cbar_ax)
+        cbar.ax.set_ylabel("Score", fontsize=14, fontweight='bold')
 
-        # Adjust layout for better spacing between heatmaps
-        plt.tight_layout()
-
-        # Save the figure with all heatmaps side by side
+        # Adjust layout
+        plt.subplots_adjust(left=0.12, right=0.9, wspace=0.3)  # increased left to avoid overlap with text
         plt.savefig("all_models_heatmaps.png", bbox_inches="tight")
         plt.close()
         print("Heatmaps saved for all models")
     except Exception as e:
         print(f"Error generating heatmap: {e}")
 
-def generate_table_png(output_path="table.png"):
-    # Data for the 2x2 Index column
+
+def generate_accuracy_table(accuracies, output_path="index_accuracy_table.json"):
     data = {
-        "Model": ["Claude 3 Opus", "Gemini Pro 1.0", "GPT-4V"],
-        "Index (2x2)": [74.77, 85.09, 92.64]
+        "Model": [model_name for model_name, _, _ in accuracies],
+        "Index (2x2)": [round(avg, 2) for _, avg, _ in accuracies]
     }
 
-    # Create a DataFrame
-    df = pd.DataFrame(data)
+    # Save the dictionary as a JSON file
+    with open(output_path, "w") as f:
+        json.dump(data, f, indent=4)
 
-    # Plot the table
-    fig, ax = plt.subplots(figsize=(4, 2))  # Adjust size for better visuals
-    ax.axis('tight')
-    ax.axis('off')
-    table = ax.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center')
-
-    # Save the table as a PNG
-    plt.savefig(output_path, bbox_inches='tight', dpi=300)
-    print(f"Table saved to {output_path}")
+    print(f"Accuracy table saved to {output_path}")
 
 
 if __name__ == "__main__":
     # Example: Adjust paths and parameters for your specific file
-    response_file = "C:\\CS228\\multimodal-needle-in-a-haystack\\response\\COCO_val2014_0_9\\results_10.json"  # Path to the JSON file
-    output_file = "C:\\CS228\\multimodal-needle-in-a-haystack\\index_accuracy_table.png"
+    response_file = "C:/Users/vulte/Documents/CS228/multimodal-needle-in-a-haystack/response/COCO_val2014_0_0/results_all_models.json"  # Path to the JSON file
+    # output_file = "C:\\CS228\\multimodal-needle-in-a-haystack\\index_accuracy_table.png"
 
-    sequence_length = 10  # Example sequence length
+    sequence_length = 1  # Example sequence length
     n_row = 2  # Example number of rows (for subimage analysis)     
 
     if not os.path.exists(response_file):

@@ -1,4 +1,3 @@
-
 import os
 import pickle
 import random
@@ -7,50 +6,82 @@ import base64
 import json
 from utils import load_image_paths
 
+def get_all_images(root_dir):
+    stitched_paths = []
+    for subdir, _, files in os.walk(root_dir):
+        for file in files:
+            if file.lower().endswith(('.jpg', '.jpeg', '.png')):
+                stitched_paths.append(os.path.join(subdir, file))
+    return stitched_paths
+
 
 def main():
     # Load image paths from stitched images
-    stitched_image_paths = load_image_paths(data_path)
+    stitched_image_paths = get_all_images('C:/Users/vulte/Documents/CS228/multimodal-needle-in-a-haystack/images_stitched')
+
     # load image paths from original images
-    image_paths = load_image_paths('val2014')
-    
+    image_paths = get_all_images('C:/Users/vulte/Documents/CS228/coco/images/val2014/val2014')
 
     sequences = []
     # load meta data N_ROW_N_COL.json
     with open(os.path.join(meta_path, str(N_ROW) + '_'+str(N_COL)+ '.json'), 'r') as f:
         meta_data = json.load(f)
+        print("opened 2_2.json successfully\n")
 
     # Generate image sequences
     for i in range(N_SEQUENCES):
         if SEQUENCE_LENGTH == 1:
             sequence = [stitched_image_paths[i]]
+            print(f"sequence: {sequence}")
         else:
             sequence = random.sample(stitched_image_paths, SEQUENCE_LENGTH)
+
         if i < N_SEQUENCES/2:
             j = random.randint(0, SEQUENCE_LENGTH*N_COL*N_ROW-1)
             idx, loc = divmod(j, N_ROW*N_COL)
             row, col = divmod(loc, N_COL)
+            print(f"idx: {idx}")
             stitched_path = sequence[idx]
-            # stitched_path = stitched_path.split('/')[-1]
             stitched_path = os.path.basename(sequence[idx])
-            # locate the image path in the stitched image
+            print(f"stitched_path: {stitched_path}")
             target_path = meta_data[stitched_path][str(row)+'_'+str(col)]
-            #print(idx, row, col, stitched_path, target_path)
         else:
             idx = -1
             row = col = -1
-            # sample a path from the image_paths other than path in the sequence
             stitched_paths = [path.split('/')[-1] for path in sequence] 
-            #exclude_images = meta_data[stitched_path].values()
             exclude_images = []
             for path in stitched_paths:
-                # exclude_images += meta_data[path].values()
                 exclude_images += meta_data[os.path.basename(path)].values()
             target_path = random.choice([path for path in image_paths if path not in exclude_images])
-        
+
+        # --- Begin: convert absolute paths to relative paths ---
+
+        # Convert stitched image paths to relative (keep after images_stitched/)
+        sequence_relative = []
+        for p in sequence:
+            parts = p.replace("\\", "/").split("images_stitched/", 1)
+            if len(parts) > 1:
+                rel_path = "images_stitched/" + parts[1]
+            else:
+                rel_path = p.replace("\\", "/")  # fallback
+            sequence_relative.append(rel_path)
+
+        # Convert target path to relative (keep after val2014/)
+        if i < N_SEQUENCES/2:
+            # target_path from meta_data is just filename like 'COCO_val2014_000000243218.jpg'
+            target_path = "val2014/" + target_path.replace("\\", "/")
+        else:
+            parts = target_path.replace("\\", "/").split("val2014/", 1)
+            if len(parts) > 1:
+                target_path = "val2014/" + parts[1]
+            else:
+                target_path = target_path.replace("\\", "/")
+
+        # --- End convert paths ---
+
         sequence_data = {
             'id': i,
-            'image_ids': sequence,
+            'image_ids': sequence_relative,
             'index': idx,
             'row': row,
             'col': col,
@@ -64,9 +95,9 @@ def main():
 
 if __name__ == "__main__":
     random.seed(0)
-    SEQUENCE_LENGTH = 10  # Length of each image sequence
+    SEQUENCE_LENGTH = 1  # Length of each image sequence
     N_SEQUENCES = 10000  # Number of sequences to generate
-    N_ROW = N_COL = 1
+    N_ROW = N_COL = 2
     data_dir = 'images_stitched'
     meta_path = 'metadata_stitched'
 

@@ -34,14 +34,14 @@ def stitch_images(images, N, RES):
 
 
 def main():
-    N_COL = N_ROW = 8  # number of images in each row and column
+    N_COL = N_ROW = 2  # number of images in each row and column
     N_IMG = 10000  # total number of sticked images to create
     RES = 224  # resolution of each subimage in the sticked image
 
     # Load image paths from a given pickle file and directory
     #image_paths = load_image_paths('annotations_trainval/file_to_caption.pkl')
 
-    image_paths=load_image_paths('val2014')
+    image_paths=load_image_paths('C:/Users/vulte/Documents/CS228/coco/images/val2014/val2014')
 
     # Ensure we have enough images
     assert len(image_paths) >= N_ROW * N_COL, "Not enough images to create a sticked image."
@@ -54,14 +54,14 @@ def main():
     if not os.path.exists(json_output_dir):
         os.makedirs(json_output_dir)
 
-    image_paths = load_image_paths('val2014')
+    # image_paths = load_image_paths('val2014')
 
     metadata = {}
     unique_paths = set()
     for i in range(N_IMG):
         sampled_paths = random.sample(image_paths, N_ROW * N_COL)
         images = [preprocess_image(Image.open(path)) for path in sampled_paths]
-        stitched_image = stitch_images(images, N_ROW, RES)
+        stitched_image = stitch_images(images, N_ROW, RES).resize((224, 224))
         filename = f'COCO_val2014_stitched_{i:04}.jpg'
         stitched_image.save(os.path.join(output_dir, filename))
 
@@ -69,7 +69,7 @@ def main():
         metadata[filename] = {}
         for idx, path in enumerate(sampled_paths):
             row, col = divmod(idx, N_COL)
-            metadata[filename][f'{row}_{col}'] = path
+            metadata[filename][f'{row}_{col}'] = os.path.basename(path)
             unique_paths.add(path)
     # Save all metadata to one JSON file after all images have been processed
     with open(json_output_file, 'w') as f:
