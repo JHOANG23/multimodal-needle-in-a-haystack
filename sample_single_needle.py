@@ -16,11 +16,14 @@ def get_all_images(root_dir):
 
 
 def main():
-    # Load image paths from stitched images
-    stitched_image_paths = get_all_images('C:/Users/vulte/Documents/CS228/multimodal-needle-in-a-haystack/images_stitched')
+    current_dir = os.path.dirname(os.path.abspath(__file__))   # e.g. .../CS228/multimodal-needle-in-a-haystack
+    cs228_root = os.path.abspath(os.path.join(current_dir, '..'))
 
-    # load image paths from original images
-    image_paths = get_all_images('C:/Users/vulte/Documents/CS228/coco/images/val2014/val2014')
+    stitched_image_paths_dir = os.path.join(cs228_root, 'multimodal-needle-in-a-haystack', 'images_stitched')
+    stitched_image_paths = get_all_images(stitched_image_paths_dir)
+
+    val2014_images_dir = os.path.join(cs228_root, 'coco', 'images', 'val2014', 'val2014')
+    image_paths = get_all_images(val2014_images_dir)
 
     sequences = []
     # load meta data N_ROW_N_COL.json

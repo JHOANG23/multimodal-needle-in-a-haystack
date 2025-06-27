@@ -40,8 +40,10 @@ def main():
 
     # Load image paths from a given pickle file and directory
     #image_paths = load_image_paths('annotations_trainval/file_to_caption.pkl')
-
-    image_paths=load_image_paths('C:/Users/vulte/Documents/CS228/coco/images/val2014/val2014')
+    current_dir = os.path.dirname(os.path.abspath(__file__))          
+    cs228_root = os.path.abspath(os.path.join(current_dir, '..'))     
+    val2014_path = os.path.join(cs228_root, 'coco', 'images', 'val2014', 'val2014')
+    image_paths=load_image_paths(val2014_path)
 
     # Ensure we have enough images
     assert len(image_paths) >= N_ROW * N_COL, "Not enough images to create a sticked image."
