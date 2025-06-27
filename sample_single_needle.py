@@ -29,7 +29,7 @@ def main():
     # load meta data N_ROW_N_COL.json
     with open(os.path.join(meta_path, str(N_ROW) + '_'+str(N_COL)+ '.json'), 'r') as f:
         meta_data = json.load(f)
-        print("opened 2_2.json successfully\n")
+        print(f"opened {N_ROW}_{N_COL}.json successfully\n")
 
     # Generate image sequences
     for i in range(N_SEQUENCES):
@@ -98,14 +98,15 @@ def main():
 
 if __name__ == "__main__":
     random.seed(0)
-    SEQUENCE_LENGTH = 1  # Length of each image sequence
-    N_SEQUENCES = 10000  # Number of sequences to generate
-    N_ROW = N_COL = 2
+    SEQUENCE_LENGTH = 1  # Length of each image sequence (DONT CHANGE)
+    N_SEQUENCES = int(os.getenv('N_IMG', '4'))  # Number of sequences to generate
+    N_ROW = int(os.getenv('N_ROW', '2'))
+    N_COL = int(os.getenv('N_COL', '2'))
     data_dir = 'images_stitched'
     meta_path = 'metadata_stitched'
 
     res_dir = str(N_ROW)+'_'+ str(N_COL)
     data_path = os.path.join(data_dir, res_dir)
     output_dir = 'metadata_stitched'
-    output_json = 'annotations_'+ str(SEQUENCE_LENGTH) + '_' + res_dir +'.json'
+    output_json = 'annotations_'+ str(N_SEQUENCES*4) + '_' + res_dir +'.json'
     main()

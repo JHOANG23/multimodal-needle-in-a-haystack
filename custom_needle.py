@@ -208,9 +208,9 @@ def main():
 if __name__ == "__main__":
     N_ROW = int(os.getenv('N_ROW', '2'))
     N_COL = int(os.getenv('N_COL', '2'))
-    SEQ_LENGTH = int(os.getenv('SEQ_LENGTH', '1'))
+    SEQ_LENGTH = int(os.getenv('SEQ_LENGTH', '1')) * 4
     BEGIN = int(os.getenv('BEGIN', '0'))
-    N_SEQ = int(os.getenv('N_SEQ', '1'))
+    N_SEQ = SEQ_LENGTH * 4
     N_NEEDLES = int(os.getenv('N_NEEDLES', '1'))
     random.seed(0)
 
