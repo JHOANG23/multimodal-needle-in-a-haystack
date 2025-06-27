@@ -83,7 +83,9 @@ def needle_test(images, instruction, model_name):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     try:
         base_model_name = "paligemma-3b-pt-224"
-        model_path = "C:/Users/vulte/Documents/CS228/paligemma-3b-pt-224"
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+        model_path = os.path.join(parent_dir, base_model_name)
         adapter_path = ""
         new_weights_path = ""
         if model_name == 'Base_Paligemma':
@@ -118,7 +120,7 @@ def main():
         meta_path = 'annotations_' + str(SEQ_LENGTH) + '_' + res_dir + '.json'
         meta_path = os.path.join('metadata_stitched', meta_path)
     else:
-        meta_path = str(N_NEEDLES) + '_' + 'annotations_' + str(SEQ_LENGTH) + '_' + res_dir + '.json'
+        meta_path = str(N_NEEDLES) + '_' + 'annotations_balanced' + str(SEQ_LENGTH) + '_' + res_dir + '.json'
         meta_path = os.path.join('metadata_stitched', meta_path)
 
     with open(meta_path, 'r') as f:
@@ -193,10 +195,11 @@ def main():
         all_results = {}
 
     # Append or create model results
-    if MODEL_NAME in all_results:
-        all_results[MODEL_NAME].extend(results)
-    else:
-        all_results[MODEL_NAME] = results
+    all_results[MODEL_NAME] = results  # Add or replace
+    # if MODEL_NAME in all_results:
+    #     all_results[MODEL_NAME].extend(results)
+    # else:
+    #     all_results[MODEL_NAME] = results
 
     with open(output_json, "w") as f:
         json.dump(all_results, f, indent=4)

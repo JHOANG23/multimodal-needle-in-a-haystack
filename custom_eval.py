@@ -127,7 +127,10 @@ def generate_accuracy_table(accuracies, output_path="index_accuracy_table.json")
 
 if __name__ == "__main__":
     # Example: Adjust paths and parameters for your specific file
-    response_file = "C:/Users/vulte/Documents/CS228/multimodal-needle-in-a-haystack/response/COCO_val2014_0_0/results_all_models.json"  # Path to the JSON file
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    response_dir = os.path.join(current_dir, 'response', 'COCO_val2014_0_0')
+    os.makedirs(response_dir, exist_ok=True)
+    response_file = os.path.join(response_dir, 'results_all_models.json')  # Path to the JSON file
     # output_file = "C:\\CS228\\multimodal-needle-in-a-haystack\\index_accuracy_table.png"
 
     sequence_length = 1  # Example sequence length
