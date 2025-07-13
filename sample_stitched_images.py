@@ -34,8 +34,9 @@ def stitch_images(images, N, RES):
 
 
 def main():
-    N_COL = N_ROW = 2  # number of images in each row and column
-    N_IMG = 10000  # total number of sticked images to create
+    N_ROW = int(os.getenv('N_ROW', '2'))
+    N_COL = int(os.getenv('N_COL', '2'))
+    N_IMG = int(os.getenv('N_IMG', '10000'))  # total number of sticked images to create
     RES = 224  # resolution of each subimage in the sticked image
 
     # Load image paths from a given pickle file and directory

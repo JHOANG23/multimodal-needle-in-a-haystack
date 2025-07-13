@@ -119,10 +119,11 @@ def main():
     if N_NEEDLES == 1:
         meta_path = 'annotations_' + str(SEQ_LENGTH) + '_' + res_dir + '.json'
         meta_path = os.path.join('metadata_stitched', meta_path)
+        print("IF CASE: This one!!!")
     else:
         meta_path = str(N_NEEDLES) + '_' + 'annotations_balanced' + str(SEQ_LENGTH) + '_' + res_dir + '.json'
         meta_path = os.path.join('metadata_stitched', meta_path)
-
+        print("ELSE CASE: This one!!!")
     with open(meta_path, 'r') as f:
         meta_data = json.load(f)
 
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     N_COL = int(os.getenv('N_COL', '2'))
     SEQ_LENGTH = int(os.getenv('SEQ_LENGTH', '1')) * 4
     BEGIN = int(os.getenv('BEGIN', '0'))
-    N_SEQ = SEQ_LENGTH * 4
+    N_SEQ = SEQ_LENGTH
     N_NEEDLES = int(os.getenv('N_NEEDLES', '1'))
     random.seed(0)
 

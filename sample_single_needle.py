@@ -99,7 +99,7 @@ def main():
 if __name__ == "__main__":
     random.seed(0)
     SEQUENCE_LENGTH = 1  # Length of each image sequence (DONT CHANGE)
-    N_SEQUENCES = int(os.getenv('N_IMG', '4'))  # Number of sequences to generate
+    N_SEQUENCES = 10000  # Number of sequences to generate
     N_ROW = int(os.getenv('N_ROW', '2'))
     N_COL = int(os.getenv('N_COL', '2'))
     data_dir = 'images_stitched'
@@ -108,5 +108,6 @@ if __name__ == "__main__":
     res_dir = str(N_ROW)+'_'+ str(N_COL)
     data_path = os.path.join(data_dir, res_dir)
     output_dir = 'metadata_stitched'
-    output_json = 'annotations_'+ str(N_SEQUENCES*4) + '_' + res_dir +'.json'
+    # output_json = 'annotations_'+ str(N_SEQUENCES) + '_' + res_dir +'.json'
+    output_json = 'annotations_'+ str(SEQUENCE_LENGTH) + '_' + res_dir +'.json'
     main()

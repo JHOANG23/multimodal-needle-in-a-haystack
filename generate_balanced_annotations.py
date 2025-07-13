@@ -7,7 +7,7 @@ from collections import defaultdict
 SEQ_LENGTH = int(os.getenv('SEQ_LENGTH', '1'))  # Number of targets per quadrant
 N_ROW = int(os.getenv('N_ROW', '2'))
 N_COL = int(os.getenv('N_COL', '2'))
-INPUT_FILE = 'metadata_stitched/annotations_1_2_2.json'
+INPUT_FILE = f'metadata_stitched/annotations_1_2_2.json'
 OUTPUT_FILE = f'metadata_stitched/annotations_balanced_{SEQ_LENGTH}_2_2.json'
 
 random.seed(42)  # For reproducibility
